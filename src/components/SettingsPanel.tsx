@@ -113,25 +113,34 @@ export function SettingsPanel({
             ))}
           </div>
 
-          <div className="mt-3 flex items-center gap-2">
-            <input
-              value={lat}
-              onChange={(event) => setLat(event.target.value)}
-              onBlur={applyCoordinates}
-              inputMode="decimal"
-              aria-label="Latitude"
-              placeholder="lat"
-              className="w-full rounded-lg bg-card px-3 py-2 text-[13px] tabular-nums outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-border"
-            />
-            <input
-              value={lon}
-              onChange={(event) => setLon(event.target.value)}
-              onBlur={applyCoordinates}
-              inputMode="decimal"
-              aria-label="Longitude"
-              placeholder="lon"
-              className="w-full rounded-lg bg-card px-3 py-2 text-[13px] tabular-nums outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-border"
-            />
+          {/* Labelled beside the field rather than by a placeholder: a
+              placeholder is gone the moment the field has a value, which is
+              always here - the preset fills both in. Two bare decimals with no
+              label are unreadable. */}
+          <p className="mb-2 mt-4 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            Or coordinates
+          </p>
+          <div className="flex items-center gap-2">
+            <label className="flex w-full items-center gap-2 rounded-lg bg-card px-3 py-2">
+              <span className="text-[11px] text-muted-foreground">Lat</span>
+              <input
+                value={lat}
+                onChange={(event) => setLat(event.target.value)}
+                onBlur={applyCoordinates}
+                inputMode="decimal"
+                className="w-full bg-transparent text-[13px] tabular-nums outline-none"
+              />
+            </label>
+            <label className="flex w-full items-center gap-2 rounded-lg bg-card px-3 py-2">
+              <span className="text-[11px] text-muted-foreground">Lon</span>
+              <input
+                value={lon}
+                onChange={(event) => setLon(event.target.value)}
+                onBlur={applyCoordinates}
+                inputMode="decimal"
+                className="w-full bg-transparent text-[13px] tabular-nums outline-none"
+              />
+            </label>
           </div>
         </Section>
 

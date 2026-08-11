@@ -21,14 +21,29 @@ const DEFAULT_WINDOW_DAYS = 180;
  */
 const TIMEZONE = "Europe/Amsterdam";
 
-/** Wall-clock parts of an instant in TIMEZONE. */
+/**
+ * Wall-clock parts of an instant in TIMEZONE.
+ *
+ * Built from parts with an explicit h23 cycle rather than a formatted string:
+ * `hour12: false` resolves to h24 in several locales, which renders midnight as
+ * "24" - and a 24 would push every after-midnight bedtime onto the wrong night.
+ */
 function localParts(iso: string): { date: string; hour: number } {
-  const at = new Date(iso);
-  const date = at.toLocaleDateString("en-CA", { timeZone: TIMEZONE }); // YYYY-MM-DD
-  const hour = Number(
-    at.toLocaleString("en-GB", { timeZone: TIMEZONE, hour: "2-digit", hour12: false }),
-  );
-  return { date, hour };
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(new Date(iso));
+
+  const part = (type: string) => parts.find((p) => p.type === type)!.value;
+
+  return {
+    date: `${part("year")}-${part("month")}-${part("day")}`,
+    hour: Number(part("hour")),
+  };
 }
 
 /**

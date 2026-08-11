@@ -27,8 +27,18 @@ it is always safe. The client polls it every 30 seconds while the tab is visible
 
 Both this app and movement-metrics live in the same Supabase project and share
 one Google service account. A calendar becomes readable by being shared with
-that account's address; `google-identity` prints it, along with every calendar
-currently visible.
+that account's address, and its id then goes into the `GOOGLE_SLEEP_CALENDAR_ID`
+secret.
+
+`google-identity` is a setup helper that prints that address along with every
+calendar the account can currently see. It is deliberately left undeployed —
+it answers to anyone who calls it — so deploy it when wiring up a new calendar
+and delete it again afterwards:
+
+```bash
+supabase functions deploy google-identity --no-verify-jwt
+supabase functions delete google-identity
+```
 
 ## Running it
 

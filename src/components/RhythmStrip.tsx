@@ -43,13 +43,6 @@ export function RhythmStrip({ stats, place, date, axisStart }: RhythmStripProps)
 
   return (
     <section>
-      <div className="mb-1.5 flex items-baseline justify-between">
-        <h2 className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-          Rhythm
-        </h2>
-        <span className="text-[10px] text-muted-foreground">{place.label}</span>
-      </div>
-
       <div className={CHART_GRID}>
         <div />
         <div

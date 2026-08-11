@@ -1,0 +1,7 @@
+project_id = "sleep-metrics"
+
+[functions.sync-sleep]
+verify_jwt = false
+
+[functions.google-identity]
+verify_jwt = false

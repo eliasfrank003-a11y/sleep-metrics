@@ -1,0 +1,22 @@
+{
+  "name": "Sleep",
+  "short_name": "Sleep",
+  "start_url": "/sleep-metrics/",
+  "scope": "/sleep-metrics/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/sleep-metrics/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/sleep-metrics/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

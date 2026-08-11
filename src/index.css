@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tokens follow musical-metrics and movement-metrics so the three apps read as
+   one family. Only the accent differs: piano is blue, movement green, this one
+   bordeaux. */
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 220 20% 10%;
+    --card: 0 0% 100%;
+    --primary: 348 62% 32%; /* bordeaux */
+    --primary-foreground: 0 0% 100%;
+    --muted: 220 14% 92%;
+    --muted-foreground: 215 20% 45%;
+    --border: 220 14% 86%;
+    --destructive: 0 72% 51%;
+
+    /* The filled part of a night. A lighter relative of the bordeaux accent
+       rather than the accent itself: a saturated bordeaux at this size reads as
+       a warning, and the bars cover a third of the screen. */
+    --sleep: 348 52% 42%;
+    /* The first and last minute of a night, drawn a shade stronger. These are
+       the edges the eye follows down the stack looking for the straight line. */
+    --sleep-edge: 348 62% 26%;
+    /* The empty 24 hours behind each night. */
+    --sleep-track: 220 14% 90%;
+    /* Sunset-to-sunrise wash behind each row, and the sun's own marks on the
+       rhythm strip. Painted at low alpha, so both need to be vivid. */
+    --night-wash: 224 70% 52%;
+    --daylight: 42 92% 50%;
+
+    /* The 24 hour ticks behind every night, and the heavier one every six. */
+    --grid-hour: 220 14% 89%;
+    --grid-major: 220 14% 78%;
+    /* The dashed verticals at the average bedtime and wake time. They cross the
+       filled bars, so they have to stay legible on top of --sleep. */
+    --guide: 220 12% 40%;
+  }
+
+  /* Dark is the default; applied as a class so the toggle controls it. */
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --primary: 348 60% 44%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 212 18% 54%;
+    --border: 0 0% 15%;
+    --destructive: 4 90% 60%;
+
+    /* Lifted for black. Below about 50% lightness a desaturated red turns to
+       brown against a pure black page. */
+    --sleep: 348 54% 47%;
+    --sleep-edge: 348 74% 72%;
+    /* Just visible as a track without competing with the filled bar. */
+    --sleep-track: 0 0% 11%;
+    --night-wash: 224 80% 62%;
+    --daylight: 45 95% 60%;
+
+    --grid-hour: 0 0% 15%;
+    --grid-major: 0 0% 26%;
+    --guide: 0 0% 62%;
+  }
+
+  html,
+  body {
+    /* The page itself never scrolls - an inner container does. iOS draws its
+       overlay indicator for the document scroll no matter what CSS asks, but
+       honours the rules on a normal element. */
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: ui-sans-serif, system-ui, -apple-system, 'SF Pro Text', sans-serif;
+    /* Installed on the home screen there is no browser chrome, so the page
+       would otherwise run under the notch and the home indicator. */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+      env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  /* Stops the whole page rubber-banding vertically when it's a standalone app. */
+  @media (display-mode: standalone) {
+    body {
+      overscroll-behavior-y: none;
+    }
+  }
+
+  /* React mounts here; without a height the percentage chain breaks and the
+     scroll container just grows to fit its content instead of scrolling. */
+  #root {
+    height: 100%;
+  }
+
+  /* The one scrolling element, with its indicator suppressed. */
+  .app-scroll {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* old Edge */
+  }
+
+  .app-scroll::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}

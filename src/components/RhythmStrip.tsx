@@ -1,4 +1,5 @@
 import {
+  alongAxis,
   darkSegments,
   formatClock,
   formatDuration,
@@ -13,6 +14,8 @@ interface RhythmStripProps {
   place: Place;
   /** Which date's sun to draw. Today, in practice. */
   date: Date;
+  /** Hour of day the strip's left edge represents. */
+  axisStart: number;
 }
 
 /**
@@ -23,15 +26,19 @@ interface RhythmStripProps {
  * drifted from the sun. Sharing the axis with every night row is what makes it
  * comparable at a glance rather than another chart to decode.
  */
-export function RhythmStrip({ stats, place, date }: RhythmStripProps) {
+export function RhythmStrip({ stats, place, date, axisStart }: RhythmStripProps) {
   const sun = sunTimes(date, place);
-  const darkness = darkSegments(sun);
+  const darkness = darkSegments(sun, axisStart);
 
   // The mean window, wrapped exactly like a real night so it sits under the
   // stack's edges rather than beside them.
   const window =
     stats.bedtime && stats.wake
-      ? wrapSegments(stats.bedtime.mean, (24 + stats.wake.mean - stats.bedtime.mean) % 24)
+      ? wrapSegments(
+          stats.bedtime.mean,
+          (24 + stats.wake.mean - stats.bedtime.mean) % 24,
+          axisStart,
+        )
       : [];
 
   return (
@@ -72,11 +79,11 @@ export function RhythmStrip({ stats, place, date }: RhythmStripProps) {
             <>
               <div
                 className="absolute inset-y-0 w-px bg-[hsl(var(--daylight)/0.9)]"
-                style={{ left: atHour(sun.sunrise) }}
+                style={{ left: atHour(alongAxis(sun.sunrise, axisStart)) }}
               />
               <div
                 className="absolute inset-y-0 w-px bg-[hsl(var(--daylight)/0.9)]"
-                style={{ left: atHour(sun.sunset) }}
+                style={{ left: atHour(alongAxis(sun.sunset, axisStart)) }}
               />
             </>
           )}

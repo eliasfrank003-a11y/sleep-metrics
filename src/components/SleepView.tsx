@@ -1,7 +1,7 @@
-import { format } from 'date-fns';
 import { RefreshCw, Settings } from 'lucide-react';
-import { formatClock, formatDuration, type Night, type SleepStats as Stats } from '@/lib/sleep';
+import type { Night, SleepStats as Stats } from '@/lib/sleep';
 import type { Place } from '@/lib/sun';
+import type { AxisStart } from '@/hooks/useAxisStart';
 import type { NightWindow } from '@/hooks/useNightWindow';
 import { NightStack } from './NightStack';
 import { RhythmStrip } from './RhythmStrip';
@@ -12,6 +12,7 @@ interface SleepViewProps {
   stats: Stats;
   place: Place;
   window: NightWindow;
+  axisStart: AxisStart;
   /** Set when the last load failed; shown instead of the empty-state copy. */
   notice: string | null;
   onOpenSettings: () => void;
@@ -25,28 +26,18 @@ export function SleepView({
   stats,
   place,
   window,
+  axisStart,
   notice,
   onOpenSettings,
   onSync,
   syncing,
   syncEnabled,
 }: SleepViewProps) {
-  const latest = nights[0] ?? null;
-
   return (
     <div className="px-5 pb-20 pt-8">
-      <header className="mb-7 flex items-start justify-between">
-        <div>
-          <h1 className="text-[26px] font-semibold tracking-tight">Sleep</h1>
-          <p className="mt-1 text-sm text-muted-foreground tabular-nums">
-            {latest
-              ? `${format(latest.date, 'd MMM')} · ${formatClock(latest.bedtime)}–${formatClock(
-                  latest.wake,
-                )} · ${formatDuration(latest.hours)}`
-              : 'nothing tracked yet'}
-          </p>
-        </div>
-        <div className="flex items-center gap-4 pt-1">
+      <header className="mb-7 flex items-center justify-between">
+        <h1 className="text-[26px] font-semibold tracking-tight">Sleep</h1>
+        <div className="flex items-center gap-4">
           {syncEnabled && (
             <button
               onClick={onSync}
@@ -84,13 +75,14 @@ export function SleepView({
           </div>
 
           <div className="mb-7">
-            <RhythmStrip stats={stats} place={place} date={new Date()} />
+            <RhythmStrip stats={stats} place={place} date={new Date()} axisStart={axisStart} />
           </div>
 
           <NightStack
             nights={nights}
             place={place}
             window={window}
+            axisStart={axisStart}
             guides={{
               bedtime: stats.bedtime?.mean ?? null,
               wake: stats.wake?.mean ?? null,

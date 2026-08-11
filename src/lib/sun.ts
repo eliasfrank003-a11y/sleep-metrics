@@ -113,16 +113,11 @@ export function sunTimes(date: Date, place: Place): SunTimes {
  * four minutes, and the bar is a few hundred pixels wide.
  */
 export const PLACES: Place[] = [
-  { label: 'Amsterdam', lat: 52.3676, lon: 4.9041 },
   { label: 'Maastricht', lat: 50.8514, lon: 5.691 },
   // Weilheim in Oberbayern, 82362.
   { label: 'Weilheim', lat: 47.8412, lon: 11.1543 },
   // Weingarten (Württemberg), near Ravensburg - not the Baden one near Karlsruhe.
   { label: 'Weingarten', lat: 47.8093, lon: 9.6383 },
-  { label: 'Berlin', lat: 52.52, lon: 13.405 },
-  { label: 'Zürich', lat: 47.3769, lon: 8.5417 },
-  { label: 'London', lat: 51.5072, lon: -0.1276 },
-  { label: 'New York', lat: 40.7128, lon: -74.006 },
 ];
 
 export const DEFAULT_PLACE = PLACES[0];

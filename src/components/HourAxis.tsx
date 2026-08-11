@@ -7,7 +7,7 @@ const LABELLED = [0, 3, 6, 9, 12, 15, 18, 21, 24];
  * Sticks to the top of the scroll container, so however far down the stack you
  * are the edge of a bar can still be read off against a time.
  */
-export function HourAxis() {
+export function HourAxis({ axisStart }: { axisStart: number }) {
   return (
     <div className={`${CHART_GRID} sticky top-0 z-10 bg-background pb-1.5 pt-2`}>
       <div />
@@ -24,7 +24,7 @@ export function HourAxis() {
                 hour === 0 ? 'none' : hour === 24 ? 'translateX(-100%)' : 'translateX(-50%)',
             }}
           >
-            {String(hour % 24).padStart(2, '0')}
+            {String((hour + axisStart) % 24).padStart(2, '0')}
           </span>
         ))}
       </div>

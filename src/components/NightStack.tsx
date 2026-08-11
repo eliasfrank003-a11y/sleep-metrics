@@ -12,6 +12,8 @@ interface NightStackProps {
   guides: { bedtime: number | null; wake: number | null };
   /** Nights to draw, counting back from the most recent one tracked. */
   window: number;
+  /** Hour of day every bar's left edge represents. */
+  axisStart: number;
 }
 
 /**
@@ -21,7 +23,7 @@ interface NightStackProps {
  * would put two nights a week apart on adjacent lines and quietly turn a broken
  * routine into a tidy one.
  */
-export function NightStack({ nights, place, guides, window }: NightStackProps) {
+export function NightStack({ nights, place, guides, window, axisStart }: NightStackProps) {
   const rows = useMemo(() => {
     if (!nights.length) return [];
 
@@ -51,7 +53,7 @@ export function NightStack({ nights, place, guides, window }: NightStackProps) {
 
   return (
     <div>
-      <HourAxis />
+      <HourAxis axisStart={axisStart} />
 
       <div className="space-y-4">
         {months.map((month) => (
@@ -67,6 +69,7 @@ export function NightStack({ nights, place, guides, window }: NightStackProps) {
                   night={row.night}
                   sun={sunTimes(row.date, place)}
                   guides={guides}
+                  axisStart={axisStart}
                 />
               ))}
             </div>

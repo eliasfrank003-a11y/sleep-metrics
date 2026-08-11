@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { buildNights, summarise } from '@/lib/sleep';
 import { useSleep } from '@/hooks/useSleep';
 import { useCalendarSync } from '@/hooks/useCalendarSync';
+import { useAxisStart } from '@/hooks/useAxisStart';
 import { useNightWindow } from '@/hooks/useNightWindow';
 import { usePlace } from '@/hooks/usePlace';
 import { SleepView } from '@/components/SleepView';
@@ -12,9 +13,10 @@ export default function App() {
   const { state: syncState, error: syncError, sync, enabled: syncEnabled } = useCalendarSync(refetch);
   const { place, setPlace } = usePlace();
   const { window, setWindow } = useNightWindow();
+  const { axisStart, setAxisStart } = useAxisStart();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const nights = useMemo(() => buildNights(sessions), [sessions]);
+  const nights = useMemo(() => buildNights(sessions, axisStart), [sessions, axisStart]);
 
   // Averaged over the nights on screen, not over everything ever recorded: the
   // guides drawn down the stack have to describe the stack you are looking at.
@@ -32,6 +34,7 @@ export default function App() {
           stats={stats}
           place={place}
           window={window}
+          axisStart={axisStart}
           // A failed load replaces the empty state's copy rather than the whole
           // screen: on a phone that means a dropped connection shows the app
           // with a note, not a stack trace where the chart should be.
@@ -50,6 +53,8 @@ export default function App() {
         onSelectPlace={setPlace}
         window={window}
         onSelectWindow={setWindow}
+        axisStart={axisStart}
+        onSelectAxisStart={setAxisStart}
         syncError={syncError}
       />
     </div>

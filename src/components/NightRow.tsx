@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { darkSegments, formatClock, formatDuration, type Night } from '@/lib/sleep';
+import { alongAxis, darkSegments, formatClock, formatDuration, type Night } from '@/lib/sleep';
 import type { SunTimes } from '@/lib/sun';
 import { atHour, CHART_GRID } from './layout';
 
@@ -11,6 +11,8 @@ interface NightRowProps {
   sun: SunTimes;
   /** Average bedtime and wake across the whole stack, drawn as guides. */
   guides: { bedtime: number | null; wake: number | null };
+  /** Hour of day the bar's left edge represents. */
+  axisStart: number;
 }
 
 /** One tick per hour, with a heavier one every six. Two gradients, not 28 nodes. */
@@ -21,9 +23,9 @@ const HOUR_TICKS = {
   ].join(','),
 };
 
-export function NightRow({ date, night, sun, guides }: NightRowProps) {
+export function NightRow({ date, night, sun, guides, axisStart }: NightRowProps) {
   const weekend = date.getDay() === 0 || date.getDay() === 6;
-  const darkness = darkSegments(sun);
+  const darkness = darkSegments(sun, axisStart);
 
   const label = night
     ? `${format(date, 'd MMMM')}: asleep ${formatClock(night.bedtime)} to ${formatClock(
@@ -73,11 +75,11 @@ export function NightRow({ date, night, sun, guides }: NightRowProps) {
           <>
             <div
               className="absolute inset-y-0 w-[2px] bg-sleep-edge"
-              style={{ left: `calc(${atHour(night.bedtime)} - 1px)` }}
+              style={{ left: `calc(${atHour(alongAxis(night.bedtime, axisStart))} - 1px)` }}
             />
             <div
               className="absolute inset-y-0 w-[2px] bg-sleep-edge"
-              style={{ left: `calc(${atHour(night.wake)} - 1px)` }}
+              style={{ left: `calc(${atHour(alongAxis(night.wake, axisStart))} - 1px)` }}
             />
           </>
         )}
@@ -86,13 +88,13 @@ export function NightRow({ date, night, sun, guides }: NightRowProps) {
         {guides.bedtime !== null && (
           <div
             className="absolute inset-y-0 w-px bg-[hsl(var(--guide)/0.5)]"
-            style={{ left: atHour(guides.bedtime) }}
+            style={{ left: atHour(alongAxis(guides.bedtime, axisStart)) }}
           />
         )}
         {guides.wake !== null && (
           <div
             className="absolute inset-y-0 w-px bg-[hsl(var(--guide)/0.5)]"
-            style={{ left: atHour(guides.wake) }}
+            style={{ left: atHour(alongAxis(guides.wake, axisStart)) }}
           />
         )}
       </div>

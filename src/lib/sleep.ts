@@ -2,7 +2,11 @@ import { format, parseISO } from 'date-fns';
 import type { SunTimes } from './sun';
 import type { SleepSession } from './types';
 
-/** A filled stretch of the 24-hour bar, in hours from local midnight. */
+/**
+ * A filled stretch of the 24-hour bar, in hours from the *left edge* of the bar
+ * rather than from midnight. The bar starts at the configured bedtime hour, so
+ * a segment at 0 is a night that began exactly on time.
+ */
 export interface Segment {
   from: number;
   to: number;
@@ -31,17 +35,28 @@ export function hourOfDay(date: Date): number {
 }
 
 /**
- * Splits a stretch of sleep across the midnight boundary.
- *
- * The bar runs midnight to midnight, so a night that starts at 22:00 fills the
- * last two hours on the right and continues from the left edge - two segments
- * on the same row rather than two rows.
+ * Where an hour of day falls along a bar that begins at `axisStart`, in hours
+ * from the left edge. 22:00 on a bar starting at 22:00 is 0; 21:00 is 23.
  */
-export function wrapSegments(startHour: number, durationHours: number): Segment[] {
+export function alongAxis(hour: number, axisStart: number): number {
+  return (((hour - axisStart) % 24) + 24) % 24;
+}
+
+/**
+ * Splits a stretch of sleep across the seam of the bar.
+ *
+ * The bar begins and ends at the same hour, so anything crossing that hour is
+ * drawn as two segments on the same row rather than as two rows.
+ */
+export function wrapSegments(
+  startHour: number,
+  durationHours: number,
+  axisStart: number,
+): Segment[] {
   if (durationHours <= 0) return [];
   if (durationHours >= 24) return [{ from: 0, to: 24 }];
 
-  const from = ((startHour % 24) + 24) % 24;
+  const from = alongAxis(startHour, axisStart);
   const to = from + durationHours;
 
   return to <= 24
@@ -53,16 +68,16 @@ export function wrapSegments(startHour: number, durationHours: number): Segment[
 }
 
 /**
- * Sunset to sunrise, wrapped across midnight exactly like a night is.
+ * Sunset to sunrise, wrapped across the seam exactly like a night is.
  *
  * Drawn behind every row so the two shapes can be compared directly: sleep that
  * sits inside the dark band is sleep in step with the daylight.
  */
-export function darkSegments(sun: SunTimes): Segment[] {
+export function darkSegments(sun: SunTimes, axisStart: number): Segment[] {
   if (sun.sunrise === null || sun.sunset === null) {
     return sun.daylightHours >= 24 ? [] : [{ from: 0, to: 24 }];
   }
-  return wrapSegments(sun.sunset, (24 + sun.sunrise - sun.sunset) % 24);
+  return wrapSegments(sun.sunset, (24 + sun.sunrise - sun.sunset) % 24, axisStart);
 }
 
 /**
@@ -80,7 +95,7 @@ export function nightOf(start: Date): string {
 }
 
 /** Groups sessions into nights, newest first. */
-export function buildNights(sessions: SleepSession[]): Night[] {
+export function buildNights(sessions: SleepSession[], axisStart: number): Night[] {
   const byNight = new Map<string, SleepSession[]>();
 
   for (const session of sessions) {
@@ -102,7 +117,7 @@ export function buildNights(sessions: SleepSession[]): Night[] {
       const duration = (parseISO(session.ended_at).getTime() - start.getTime()) / 3_600_000;
       if (duration <= 0) continue;
       hours += duration;
-      segments.push(...wrapSegments(hourOfDay(start), duration));
+      segments.push(...wrapSegments(hourOfDay(start), duration, axisStart));
     }
 
     if (!segments.length) continue;

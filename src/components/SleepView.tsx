@@ -1,7 +1,6 @@
 import { RefreshCw, Settings } from 'lucide-react';
 import type { Night, SleepStats as Stats } from '@/lib/sleep';
 import type { Place } from '@/lib/sun';
-import type { AxisStart } from '@/hooks/useAxisStart';
 import type { NightWindow } from '@/hooks/useNightWindow';
 import { NightStack } from './NightStack';
 import { RhythmStrip } from './RhythmStrip';
@@ -12,7 +11,8 @@ interface SleepViewProps {
   stats: Stats;
   place: Place;
   window: NightWindow;
-  axisStart: AxisStart;
+  /** Hour of day every bar's left edge represents, centred on the average night. */
+  axisStart: number;
   /** Set when the last load failed; shown instead of the empty-state copy. */
   notice: string | null;
   onOpenSettings: () => void;

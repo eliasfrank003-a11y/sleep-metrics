@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Moon, Sun, X } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
-import { AXIS_STARTS, type AxisStart } from '@/hooks/useAxisStart';
 import { WINDOWS, type NightWindow } from '@/hooks/useNightWindow';
 import { PLACES, type Place } from '@/lib/sun';
 
@@ -12,8 +11,6 @@ interface SettingsPanelProps {
   onSelectPlace: (place: Place) => void;
   window: NightWindow;
   onSelectWindow: (window: NightWindow) => void;
-  axisStart: AxisStart;
-  onSelectAxisStart: (hour: AxisStart) => void;
   /** Surfaced here rather than on the chart: a sync error is not a night. */
   syncError: string | null;
 }
@@ -59,8 +56,6 @@ export function SettingsPanel({
   onSelectPlace,
   window,
   onSelectWindow,
-  axisStart,
-  onSelectAxisStart,
   syncError,
 }: SettingsPanelProps) {
   const { theme, toggle } = useTheme();
@@ -90,23 +85,6 @@ export function SettingsPanel({
             <X className="h-4 w-4" />
           </button>
         </header>
-
-        <Section
-          title="Bar starts at"
-          hint="Set this to your bedtime and every night begins at the left edge. A night that starts earlier than this wraps round to the right edge instead, so pick an hour you are never in bed before."
-        >
-          <div className="grid grid-cols-4 gap-2">
-            {AXIS_STARTS.map((option) => (
-              <Choice
-                key={option}
-                active={option === axisStart}
-                onClick={() => onSelectAxisStart(option)}
-              >
-                {String(option).padStart(2, '0')}:00
-              </Choice>
-            ))}
-          </div>
-        </Section>
 
         <Section title="Nights shown">
           <div className="grid grid-cols-4 gap-2">

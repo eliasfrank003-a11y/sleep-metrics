@@ -43,11 +43,17 @@ export function NightStack({ nights, guides, window, axisStart }: NightStackProp
       <HourAxis axisStart={axisStart} />
 
       <div className="space-y-4">
-        {months.map((month) => (
+        {months.map((month, index) => (
           <section key={month.id}>
-            <h2 className="mb-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-              {month.label}
-            </h2>
+            {/* The newest month goes unlabelled. It sits directly under the hour
+                axis, where a heading crowds the one row of text that has to stay
+                readable - and the month you are already looking at is the one
+                you least need told. */}
+            {index > 0 && (
+              <h2 className="mb-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                {month.label}
+              </h2>
+            )}
             <div className="space-y-[3px]">
               {month.rows.map((night) => (
                 <NightRow

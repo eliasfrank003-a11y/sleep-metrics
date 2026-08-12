@@ -6,8 +6,9 @@
  * whose length has to be measured against a scale somewhere else on screen.
  *
  * The cuts are drawn in the page background so they read as gaps rather than as
- * a third colour, and every third one is doubled so the bar groups into eights
- * that line up with the labels on the axis.
+ * a third colour. All 24 are identical: an emphasised one every third hour gave
+ * the row two competing rhythms, and the eye counted the heavy ones instead of
+ * the cells.
  */
 export function HourCuts() {
   return (
@@ -15,10 +16,7 @@ export function HourCuts() {
       className="pointer-events-none absolute inset-0"
       aria-hidden="true"
       style={{
-        backgroundImage: [
-          `repeating-linear-gradient(to right, hsl(var(--background)) 0 2px, transparent 2px calc(100% / 8))`,
-          `repeating-linear-gradient(to right, hsl(var(--background)) 0 1px, transparent 1px calc(100% / 24))`,
-        ].join(','),
+        backgroundImage: `repeating-linear-gradient(to right, hsl(var(--background)) 0 1px, transparent 1px calc(100% / 24))`,
       }}
     />
   );

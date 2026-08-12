@@ -1,5 +1,4 @@
 import { format, parseISO } from 'date-fns';
-import type { SunTimes } from './sun';
 import type { SleepSession } from './types';
 
 /**
@@ -17,8 +16,6 @@ export interface Night {
   key: string;
   date: Date;
   sessions: SleepSession[];
-  /** Everything slept that night, wrapped into a single 0-24 bar. */
-  segments: Segment[];
   /** Total time asleep, in hours - gaps between sessions are not counted. */
   hours: number;
   /** Local hour of day the first session started. */
@@ -68,17 +65,19 @@ export function wrapSegments(
 }
 
 /**
- * Sunrise to sunset, wrapped across the seam exactly like a night is.
+ * The hour to begin the bar at so the average night lands in the middle of it.
  *
- * Painting the light rather than the dark keeps the bar's only tinted region
- * matching the arrows underneath it, and leaves the night as plain track - which
- * is what the sleep block needs to sit against to stay countable.
+ * Anchoring the left edge to bedtime made the bar's seam and the moment being
+ * measured the same point, so a night that ran ten minutes early jumped the
+ * whole width of the chart. Centred, the seam sits in the early afternoon -
+ * hours from any bedtime - and being early and being late are drawn the same
+ * size, in opposite directions, which is the comparison worth seeing.
  */
-export function lightSegments(sun: SunTimes, axisStart: number): Segment[] {
-  if (sun.sunrise === null || sun.sunset === null) {
-    return sun.daylightHours >= 24 ? [{ from: 0, to: 24 }] : [];
-  }
-  return wrapSegments(sun.sunrise, (24 + sun.sunset - sun.sunrise) % 24, axisStart);
+export function centredAxisStart(midpoint: Spread | null): number {
+  // 03:00 until there is data to say otherwise: a plausible middle of a night,
+  // and it keeps the axis from lurching when the first one arrives.
+  const centre = midpoint?.mean ?? 3;
+  return Math.round((((centre - 12) % 24) + 24) % 24) % 24;
 }
 
 /**
@@ -95,8 +94,28 @@ export function nightOf(start: Date): string {
   return format(night, 'yyyy-MM-dd');
 }
 
+/** Hours slept in one session, or 0 for a stop that landed before its start. */
+function sessionHours(session: SleepSession): number {
+  const hours =
+    (parseISO(session.ended_at).getTime() - parseISO(session.started_at).getTime()) / 3_600_000;
+  return hours > 0 ? hours : 0;
+}
+
+/**
+ * A night's filled stretches, positioned against a bar starting at `axisStart`.
+ *
+ * Kept off the Night itself: where the bar starts depends on the average night,
+ * which is computed from the nights, so a Night that already knew its own
+ * geometry would have to be built before the thing that decides its geometry.
+ */
+export function segmentsFor(night: Night, axisStart: number): Segment[] {
+  return night.sessions.flatMap((session) =>
+    wrapSegments(hourOfDay(parseISO(session.started_at)), sessionHours(session), axisStart),
+  );
+}
+
 /** Groups sessions into nights, newest first. */
-export function buildNights(sessions: SleepSession[], axisStart: number): Night[] {
+export function buildNights(sessions: SleepSession[]): Night[] {
   const byNight = new Map<string, SleepSession[]>();
 
   for (const session of sessions) {
@@ -109,19 +128,9 @@ export function buildNights(sessions: SleepSession[], axisStart: number): Night[
 
   for (const [key, group] of byNight) {
     const ordered = [...group].sort((a, b) => a.started_at.localeCompare(b.started_at));
+    const hours = ordered.reduce((sum, session) => sum + sessionHours(session), 0);
 
-    const segments: Segment[] = [];
-    let hours = 0;
-
-    for (const session of ordered) {
-      const start = parseISO(session.started_at);
-      const duration = (parseISO(session.ended_at).getTime() - start.getTime()) / 3_600_000;
-      if (duration <= 0) continue;
-      hours += duration;
-      segments.push(...wrapSegments(hourOfDay(start), duration, axisStart));
-    }
-
-    if (!segments.length) continue;
+    if (hours <= 0) continue;
 
     const first = parseISO(ordered[0].started_at);
     const last = parseISO(ordered[ordered.length - 1].ended_at);
@@ -130,7 +139,6 @@ export function buildNights(sessions: SleepSession[], axisStart: number): Night[
       key,
       date: parseISO(`${key}T00:00:00`),
       sessions: ordered,
-      segments,
       hours,
       bedtime: hourOfDay(first),
       wake: hourOfDay(last),

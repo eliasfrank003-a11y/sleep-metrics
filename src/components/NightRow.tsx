@@ -1,5 +1,6 @@
+import { useMemo } from 'react';
 import { format } from 'date-fns';
-import { alongAxis, formatClock, formatDuration, type Night } from '@/lib/sleep';
+import { alongAxis, formatClock, formatDuration, segmentsFor, type Night } from '@/lib/sleep';
 import { atHour, CHART_GRID } from './layout';
 import { HourCuts } from './HourCuts';
 
@@ -18,6 +19,7 @@ const DASH = {
 
 export function NightRow({ night, guides, axisStart }: NightRowProps) {
   const weekend = night.date.getDay() === 0 || night.date.getDay() === 6;
+  const segments = useMemo(() => segmentsFor(night, axisStart), [night, axisStart]);
 
   return (
     <div className={CHART_GRID}>
@@ -30,13 +32,13 @@ export function NightRow({ night, guides, axisStart }: NightRowProps) {
       </span>
 
       <div
-        className="relative h-4 overflow-hidden rounded-[3px] bg-sleep-track"
+        className="relative h-4 overflow-hidden bg-sleep-track"
         role="img"
         aria-label={`${format(night.date, 'd MMMM')}: asleep ${formatClock(
           night.bedtime,
         )} to ${formatClock(night.wake)}, ${formatDuration(night.hours)}`}
       >
-        {night.segments.map((segment, index) => (
+        {segments.map((segment, index) => (
           <div
             key={index}
             className="absolute inset-y-0 bg-sleep"

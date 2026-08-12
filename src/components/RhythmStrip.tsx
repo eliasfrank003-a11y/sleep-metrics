@@ -72,14 +72,16 @@ export function RhythmStrip({ stats, place, date }: RhythmStripProps) {
             hour cuts and explaining themselves to nobody. */}
         <p className="whitespace-nowrap text-[10px] tabular-nums text-muted-foreground">
           {sun.sunrise === null || sun.sunset === null ? (
-            `${place.label} (${sun.daylightHours >= 24 ? 'sun never sets' : 'sun never rises'})`
+            `${place.label}: ${sun.daylightHours >= 24 ? 'sun never sets' : 'sun never rises'}`
           ) : (
             <>
-              {place.label} (<span className="text-daylight">↑</span> {formatClock(sun.sunrise)}
+              {place.label}: <span className="text-daylight">↑</span> {formatClock(sun.sunrise)}
               <span className="mx-1 opacity-40">·</span>
               <span className="text-daylight">↓</span> {formatClock(sun.sunset)}
               <span className="mx-1 opacity-40">·</span>
-              {formatDuration(sun.daylightHours)} daylight)
+              {/* The two arrows already say what the span is; spelling out
+                  "daylight" only pushed the line past the edge of the bar. */}
+              {formatDuration(sun.daylightHours)}
             </>
           )}
         </p>

@@ -11,8 +11,6 @@ interface SleepViewProps {
   stats: Stats;
   place: Place;
   window: NightWindow;
-  /** Hour of day every bar's left edge represents, centred on the average night. */
-  axisStart: number;
   /** Set when the last load failed; shown instead of the empty-state copy. */
   notice: string | null;
   onOpenSettings: () => void;
@@ -26,7 +24,6 @@ export function SleepView({
   stats,
   place,
   window,
-  axisStart,
   notice,
   onOpenSettings,
   onSync,
@@ -37,13 +34,16 @@ export function SleepView({
     <div className="px-5 pb-20 pt-8">
       <header className="mb-7 flex items-center justify-between">
         <h1 className="text-[26px] font-semibold tracking-tight">Sleep</h1>
-        <div className="flex items-center gap-4">
+        {/* The negative margins keep the icons where they look right while the
+            padding gives them a target a thumb can actually hit. gap-6 leaves
+            the two targets clear of each other once they have grown. */}
+        <div className="-m-2.5 flex items-center gap-6">
           {syncEnabled && (
             <button
               onClick={onSync}
               disabled={syncing}
               aria-label="Sync calendar now"
-              className="text-muted-foreground transition-colors hover:text-foreground disabled:opacity-60"
+              className="p-2.5 text-muted-foreground transition-colors hover:text-foreground disabled:opacity-60"
             >
               <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
             </button>
@@ -51,7 +51,7 @@ export function SleepView({
           <button
             onClick={onOpenSettings}
             aria-label="Open settings"
-            className="text-muted-foreground transition-colors hover:text-foreground"
+            className="p-2.5 text-muted-foreground transition-colors hover:text-foreground"
           >
             <Settings className="h-4 w-4" />
           </button>
@@ -75,18 +75,10 @@ export function SleepView({
           </div>
 
           <div className="mb-7">
-            <RhythmStrip stats={stats} place={place} date={new Date()} axisStart={axisStart} />
+            <RhythmStrip stats={stats} place={place} date={new Date()} />
           </div>
 
-          <NightStack
-            nights={nights}
-            window={window}
-            axisStart={axisStart}
-            guides={{
-              bedtime: stats.bedtime?.mean ?? null,
-              wake: stats.wake?.mean ?? null,
-            }}
-          />
+          <NightStack nights={nights} window={window} />
         </>
       )}
     </div>

@@ -1,25 +1,19 @@
 import { useMemo } from 'react';
 import { format } from 'date-fns';
-import { alongAxis, formatClock, formatDuration, segmentsFor, type Night } from '@/lib/sleep';
+import {
+  AXIS_START,
+  formatClock,
+  formatCompact,
+  formatDuration,
+  segmentsFor,
+  type Night,
+} from '@/lib/sleep';
 import { atHour, CHART_GRID } from './layout';
 import { HourCuts } from './HourCuts';
 
-interface NightRowProps {
-  night: Night;
-  /** Average bedtime and wake across the stack, drawn as guides. */
-  guides: { bedtime: number | null; wake: number | null };
-  /** Hour of day the bar's left edge represents. */
-  axisStart: number;
-}
-
-/** A dashed vertical, so an average never reads as one of the hour cuts. */
-const DASH = {
-  backgroundImage: `linear-gradient(to bottom, hsl(var(--guide)) 0 2px, transparent 2px 4px)`,
-};
-
-export function NightRow({ night, guides, axisStart }: NightRowProps) {
+export function NightRow({ night }: { night: Night }) {
   const weekend = night.date.getDay() === 0 || night.date.getDay() === 6;
-  const segments = useMemo(() => segmentsFor(night, axisStart), [night, axisStart]);
+  const segments = useMemo(() => segmentsFor(night, AXIS_START), [night]);
 
   return (
     <div className={CHART_GRID}>
@@ -47,23 +41,10 @@ export function NightRow({ night, guides, axisStart }: NightRowProps) {
         ))}
 
         <HourCuts />
-
-        {guides.bedtime !== null && (
-          <div
-            className="absolute inset-y-0 w-px opacity-60"
-            style={{ ...DASH, left: atHour(alongAxis(guides.bedtime, axisStart)) }}
-          />
-        )}
-        {guides.wake !== null && (
-          <div
-            className="absolute inset-y-0 w-px opacity-60"
-            style={{ ...DASH, left: atHour(alongAxis(guides.wake, axisStart)) }}
-          />
-        )}
       </div>
 
       <span className="whitespace-nowrap text-[10px] tabular-nums text-muted-foreground">
-        {formatDuration(night.hours)}
+        {formatCompact(night.hours)}
       </span>
     </div>
   );

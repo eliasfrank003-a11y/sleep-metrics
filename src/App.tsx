@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { buildNights, centredAxisStart, summarise } from '@/lib/sleep';
+import { buildNights, summarise } from '@/lib/sleep';
 import { useSleep } from '@/hooks/useSleep';
 import { useCalendarSync } from '@/hooks/useCalendarSync';
 import { useNightWindow } from '@/hooks/useNightWindow';
@@ -20,11 +20,6 @@ export default function App() {
   // guides drawn down the stack have to describe the stack you are looking at.
   const stats = useMemo(() => summarise(nights.slice(0, window)), [nights, window]);
 
-  // Derived from the nights rather than chosen: the bar is centred on whatever
-  // the middle of your night actually is, so going to bed early and going to bed
-  // late are drawn as equal and opposite rather than one of them jumping the
-  // full width of the chart.
-  const axisStart = useMemo(() => centredAxisStart(stats.midpoint), [stats.midpoint]);
 
   if (isLoading) {
     return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
@@ -38,7 +33,6 @@ export default function App() {
           stats={stats}
           place={place}
           window={window}
-          axisStart={axisStart}
           // A failed load replaces the empty state's copy rather than the whole
           // screen: on a phone that means a dropped connection shows the app
           // with a note, not a stack trace where the chart should be.

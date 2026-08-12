@@ -1,4 +1,10 @@
-import { formatClock, formatDuration, wrapSegments, type SleepStats } from '@/lib/sleep';
+import {
+  AXIS_START,
+  formatClock,
+  formatDuration,
+  wrapSegments,
+  type SleepStats,
+} from '@/lib/sleep';
 import { sunTimes, type Place } from '@/lib/sun';
 import { atHour, CHART_GRID } from './layout';
 import { HourCuts } from './HourCuts';
@@ -8,8 +14,6 @@ interface RhythmStripProps {
   place: Place;
   /** Which date's sun to draw. Today, in practice. */
   date: Date;
-  /** Hour of day the strip's left edge represents. */
-  axisStart: number;
 }
 
 /**
@@ -19,7 +23,7 @@ interface RhythmStripProps {
  * Sharing the axis and the hour cuts with every night row is what makes it
  * comparable at a glance rather than another chart to decode.
  */
-export function RhythmStrip({ stats, place, date, axisStart }: RhythmStripProps) {
+export function RhythmStrip({ stats, place, date }: RhythmStripProps) {
   const sun = sunTimes(date, place);
 
   // The mean window, wrapped exactly like a real night so it sits under the
@@ -29,7 +33,7 @@ export function RhythmStrip({ stats, place, date, axisStart }: RhythmStripProps)
       ? wrapSegments(
           stats.bedtime.mean,
           (24 + stats.wake.mean - stats.bedtime.mean) % 24,
-          axisStart,
+          AXIS_START,
         )
       : [];
 

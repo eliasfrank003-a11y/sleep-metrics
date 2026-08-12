@@ -65,20 +65,18 @@ export function wrapSegments(
 }
 
 /**
- * The hour to begin the bar at so the average night lands in the middle of it.
+ * The hour every bar begins and ends at: midday to midday.
  *
- * Anchoring the left edge to bedtime made the bar's seam and the moment being
- * measured the same point, so a night that ran ten minutes early jumped the
- * whole width of the chart. Centred, the seam sits in the early afternoon -
- * hours from any bedtime - and being early and being late are drawn the same
- * size, in opposite directions, which is the comparison worth seeing.
+ * The seam has to fall as far from bedtime as it can, or a night that ran ten
+ * minutes early jumps the whole width of the chart while one that ran ten
+ * minutes late barely moves. Midday is that point, and it is the same one that
+ * decides which night a session belongs to - so a night can never be split
+ * across two rows either.
+ *
+ * Fixed rather than derived from the data: an axis that re-centres itself
+ * silently redraws every night in the stack the first time a late one lands.
  */
-export function centredAxisStart(midpoint: Spread | null): number {
-  // 03:00 until there is data to say otherwise: a plausible middle of a night,
-  // and it keeps the axis from lurching when the first one arrives.
-  const centre = midpoint?.mean ?? 3;
-  return Math.round((((centre - 12) % 24) + 24) % 24) % 24;
-}
+export const AXIS_START = 12;
 
 /**
  * The night a session is filed under, named after the evening it began.
@@ -229,6 +227,17 @@ export function formatClock(hour: number): string {
   const h = Math.floor(total / 60) % 24;
   const m = total % 60;
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+/**
+ * '8:11' - the same duration as formatDuration in the width of a clock time.
+ * Used in the stack, where every character taken from the gutters is a
+ * character of bar width given back.
+ */
+export function formatCompact(hours: number): string {
+  if (hours <= 0) return '—';
+  const total = Math.round(hours * 60);
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 }
 
 /** '7h 42m' from a count of hours. */

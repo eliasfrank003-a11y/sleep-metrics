@@ -7,11 +7,8 @@ import { NightRow } from './NightRow';
 interface NightStackProps {
   /** Newest first. */
   nights: Night[];
-  guides: { bedtime: number | null; wake: number | null };
   /** How many of the most recent nights to draw. */
   window: number;
-  /** Hour of day every bar's left edge represents. */
-  axisStart: number;
 }
 
 /**
@@ -21,7 +18,7 @@ interface NightStackProps {
  * drawing it as an empty row says that it was. The date in the gutter is what
  * shows a gap, and it costs nothing to read.
  */
-export function NightStack({ nights, guides, window, axisStart }: NightStackProps) {
+export function NightStack({ nights, window }: NightStackProps) {
   const rows = useMemo(() => nights.slice(0, window), [nights, window]);
 
   // Grouped so a long stack keeps its bearings while scrolling.
@@ -40,7 +37,7 @@ export function NightStack({ nights, guides, window, axisStart }: NightStackProp
 
   return (
     <div>
-      <HourAxis axisStart={axisStart} />
+      <HourAxis />
 
       <div className="space-y-4">
         {months.map((month, index) => (
@@ -56,12 +53,7 @@ export function NightStack({ nights, guides, window, axisStart }: NightStackProp
             )}
             <div className="space-y-[3px]">
               {month.rows.map((night) => (
-                <NightRow
-                  key={night.key}
-                  night={night}
-                  guides={guides}
-                  axisStart={axisStart}
-                />
+                <NightRow key={night.key} night={night} />
               ))}
             </div>
           </section>

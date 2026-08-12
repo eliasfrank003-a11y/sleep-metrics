@@ -77,10 +77,13 @@ export function SettingsPanel({
       <div className="mx-auto max-w-md px-5 pb-20 pt-8">
         <header className="mb-8 flex items-start justify-between">
           <h1 className="text-[26px] font-semibold tracking-tight">Settings</h1>
+          {/* A 16px icon in the corner of a phone screen is not a target. The
+              padding takes it to 40px square; the negative margin keeps it
+              looking like it never moved. */}
           <button
             onClick={onClose}
             aria-label="Close settings"
-            className="text-muted-foreground transition-colors hover:text-foreground"
+            className="-m-3 p-3 text-muted-foreground transition-colors hover:text-foreground"
           >
             <X className="h-4 w-4" />
           </button>

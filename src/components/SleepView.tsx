@@ -80,7 +80,6 @@ export function SleepView({
 
           <NightStack
             nights={nights}
-            place={place}
             window={window}
             axisStart={axisStart}
             guides={{

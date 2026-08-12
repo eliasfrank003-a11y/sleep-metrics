@@ -21,19 +21,12 @@
        rather than the accent itself: a saturated bordeaux at this size reads as
        a warning, and the bars cover a third of the screen. */
     --sleep: 348 52% 42%;
-    /* The first and last minute of a night, drawn a shade stronger. These are
-       the edges the eye follows down the stack looking for the straight line. */
-    --sleep-edge: 348 62% 26%;
     /* The empty 24 hours behind each night. */
     --sleep-track: 220 14% 90%;
-    /* Sunset-to-sunrise wash behind each row, and the sun's own marks on the
-       rhythm strip. Painted at low alpha, so both need to be vivid. */
-    --night-wash: 224 70% 52%;
+    /* Sunrise-to-sunset wash on the rhythm strip, and the sun's own marks on
+       it. Painted at low alpha, so it needs to be vivid. */
     --daylight: 42 92% 50%;
 
-    /* The 24 hour ticks behind every night, and the heavier one every six. */
-    --grid-hour: 220 14% 89%;
-    --grid-major: 220 14% 78%;
     /* The dashed verticals at the average bedtime and wake time. They cross the
        filled bars, so they have to stay legible on top of --sleep. */
     --guide: 220 12% 40%;
@@ -54,14 +47,10 @@
     /* Lifted for black. Below about 50% lightness a desaturated red turns to
        brown against a pure black page. */
     --sleep: 348 54% 47%;
-    --sleep-edge: 348 74% 72%;
     /* Just visible as a track without competing with the filled bar. */
     --sleep-track: 0 0% 11%;
-    --night-wash: 224 80% 62%;
     --daylight: 45 95% 60%;
 
-    --grid-hour: 0 0% 15%;
-    --grid-major: 0 0% 26%;
     --guide: 0 0% 62%;
   }
 

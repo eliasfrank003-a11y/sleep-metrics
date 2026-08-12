@@ -22,7 +22,6 @@ export default {
         destructive: 'hsl(var(--destructive))',
         sleep: {
           DEFAULT: 'hsl(var(--sleep))',
-          edge: 'hsl(var(--sleep-edge))',
           track: 'hsl(var(--sleep-track))',
         },
         daylight: 'hsl(var(--daylight))',

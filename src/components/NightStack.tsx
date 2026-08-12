@@ -1,50 +1,37 @@
 import { useMemo } from 'react';
-import { format, subDays } from 'date-fns';
+import { format } from 'date-fns';
 import type { Night } from '@/lib/sleep';
-import { sunTimes, type Place } from '@/lib/sun';
 import { HourAxis } from './HourAxis';
 import { NightRow } from './NightRow';
 
 interface NightStackProps {
   /** Newest first. */
   nights: Night[];
-  place: Place;
   guides: { bedtime: number | null; wake: number | null };
-  /** Nights to draw, counting back from the most recent one tracked. */
+  /** How many of the most recent nights to draw. */
   window: number;
   /** Hour of day every bar's left edge represents. */
   axisStart: number;
 }
 
 /**
- * Every night from the latest tracked one back, newest at the top.
+ * The nights that were actually tracked, newest at the top.
  *
- * Untracked nights are drawn as empty rows rather than skipped. Closing the gap
- * would put two nights a week apart on adjacent lines and quietly turn a broken
- * routine into a tidy one.
+ * Only those: a night with nothing recorded is not a night of no sleep, and
+ * drawing it as an empty row says that it was. The date in the gutter is what
+ * shows a gap, and it costs nothing to read.
  */
-export function NightStack({ nights, place, guides, window, axisStart }: NightStackProps) {
-  const rows = useMemo(() => {
-    if (!nights.length) return [];
-
-    const byKey = new Map(nights.map((night) => [night.key, night]));
-    const latest = nights[0].date;
-
-    return Array.from({ length: window }, (_, offset) => {
-      const date = subDays(latest, offset);
-      const key = format(date, 'yyyy-MM-dd');
-      return { key, date, night: byKey.get(key) ?? null };
-    });
-  }, [nights, window]);
+export function NightStack({ nights, guides, window, axisStart }: NightStackProps) {
+  const rows = useMemo(() => nights.slice(0, window), [nights, window]);
 
   // Grouped so a long stack keeps its bearings while scrolling.
   const months = useMemo(() => {
-    const groups: Array<{ id: string; label: string; rows: typeof rows }> = [];
-    for (const row of rows) {
-      const id = format(row.date, 'yyyy-MM');
+    const groups: Array<{ id: string; label: string; rows: Night[] }> = [];
+    for (const night of rows) {
+      const id = format(night.date, 'yyyy-MM');
       const last = groups[groups.length - 1];
-      if (last?.id === id) last.rows.push(row);
-      else groups.push({ id, label: format(row.date, 'MMMM yyyy'), rows: [row] });
+      if (last?.id === id) last.rows.push(night);
+      else groups.push({ id, label: format(night.date, 'MMMM yyyy'), rows: [night] });
     }
     return groups;
   }, [rows]);
@@ -62,12 +49,10 @@ export function NightStack({ nights, place, guides, window, axisStart }: NightSt
               {month.label}
             </h2>
             <div className="space-y-[3px]">
-              {month.rows.map((row) => (
+              {month.rows.map((night) => (
                 <NightRow
-                  key={row.key}
-                  date={row.date}
-                  night={row.night}
-                  sun={sunTimes(row.date, place)}
+                  key={night.key}
+                  night={night}
                   guides={guides}
                   axisStart={axisStart}
                 />

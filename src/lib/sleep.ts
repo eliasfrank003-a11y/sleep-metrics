@@ -68,16 +68,17 @@ export function wrapSegments(
 }
 
 /**
- * Sunset to sunrise, wrapped across the seam exactly like a night is.
+ * Sunrise to sunset, wrapped across the seam exactly like a night is.
  *
- * Drawn behind every row so the two shapes can be compared directly: sleep that
- * sits inside the dark band is sleep in step with the daylight.
+ * Painting the light rather than the dark keeps the bar's only tinted region
+ * matching the arrows underneath it, and leaves the night as plain track - which
+ * is what the sleep block needs to sit against to stay countable.
  */
-export function darkSegments(sun: SunTimes, axisStart: number): Segment[] {
+export function lightSegments(sun: SunTimes, axisStart: number): Segment[] {
   if (sun.sunrise === null || sun.sunset === null) {
-    return sun.daylightHours >= 24 ? [] : [{ from: 0, to: 24 }];
+    return sun.daylightHours >= 24 ? [{ from: 0, to: 24 }] : [];
   }
-  return wrapSegments(sun.sunset, (24 + sun.sunrise - sun.sunset) % 24, axisStart);
+  return wrapSegments(sun.sunrise, (24 + sun.sunset - sun.sunrise) % 24, axisStart);
 }
 
 /**

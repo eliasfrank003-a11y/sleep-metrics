@@ -70,10 +70,16 @@ the point furthest from when anyone sleeps, so a bedtime drifting from 21:00 to
 
 ## The icon
 
-A clock face with no numbers and no hands. The only thing it says is which
-fraction of the day is spent asleep: bordeaux from 22:00 round to 06:30, the
-waking three and a half hours in grey-white, with straight radial edges because
-it is a proportion and not a progress ring.
+A thin ring carrying one full day, not twelve hours round twice — so a sleep
+window that crosses midnight is a single continuous arc instead of a shape that
+wraps and reads as two. It is oriented the way a day feels rather than the way a
+clock is built: midnight at the bottom, noon at the top, 06:00 at the left and
+18:00 at the right, which puts the night along the bottom of the ring.
+
+No numbers, no hands, empty in the middle. Bordeaux for the sleep window,
+grey-white for the waking hours, and square cuts across the ring where they meet
+rather than round caps — it is a boundary between two parts of a whole, not the
+end of a bar.
 
 ```bash
 python3 scripts/makeicon.py

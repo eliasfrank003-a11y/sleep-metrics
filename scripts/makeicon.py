@@ -42,9 +42,27 @@ WAKING = (0xD9, 0xD6, 0xD4)
 SLEEP_FROM = 22.0
 SLEEP_TO = 6.5
 
-# Outer edge and band thickness, as fractions of the canvas.
-OUTER = 0.355
-THICKNESS = 0.050
+# ---------------------------------------------------------------------------
+# Shared icon spec, in 1024-pixel canvas units. The same three numbers appear in
+# sleep-metrics, movement-metrics and recalibration, and the point of them is
+# that the four tiles read as one family sitting next to each other on a home
+# screen. Change one, change all of them.
+#
+#   ground   black
+#   STROKE   76   every line, band and bar is this thick
+#   EXTENT  665   the mark's longer dimension, ~65% of the tile
+#
+# Caps are fully round wherever a line simply stops. The exception is the sleep
+# dial, where the two arcs are cut square: there they divide one shared ring
+# rather than terminate, and a round cap would claim an end that is not there.
+# ---------------------------------------------------------------------------
+STROKE = 76
+EXTENT = 665
+
+# Diameter is EXTENT, so the dial covers the same share of the tile as the marks
+# in the sibling apps; the band is the shared stroke.
+OUTER = (EXTENT / 2) / 1024
+THICKNESS = STROKE / 1024
 
 
 def rgb(h, s, l):

@@ -67,3 +67,17 @@ One table, `sleep_sessions`: a Google event id, a start, an end, and the night i
 counts toward. Nights are named after the evening they began, split at midday —
 the point furthest from when anyone sleeps, so a bedtime drifting from 21:00 to
 03:00 never jumps to a different row.
+
+## The icon
+
+A clock face with no numbers and no hands. The only thing it says is which
+fraction of the day is spent asleep: bordeaux from 22:00 round to 06:30, the
+waking three and a half hours in grey-white, with straight radial edges because
+it is a proportion and not a progress ring.
+
+```bash
+python3 scripts/makeicon.py
+```
+
+Regenerate after changing `--primary` in `src/index.css` — the script carries
+its own copy of that colour.

@@ -18,8 +18,10 @@ Writes favicon.svg, icon-192.png, icon-512.png and apple-touch-icon.png into
 public/. Not run at build time - the icon changes about once.
 """
 import colorsys
+import hashlib
 import math
 import pathlib
+import re
 import sys
 
 from PIL import Image, ImageDraw, ImageFont
@@ -152,6 +154,46 @@ def svg():
     )
 
 
+def stamp(public, root):
+    """
+    Version the icon URLs so that a changed icon actually reaches the phone.
+
+    iOS caches the home-screen icon per URL, in a store that outlives clearing
+    Safari's website data - so replacing the bytes behind apple-touch-icon.png
+    changes nothing at all, and "Add to Home Screen" goes on offering the old
+    picture indefinitely. (The share sheet reads the favicon instead, which is
+    why the two previews can disagree and the share sheet is the one telling
+    the truth.)
+
+    Stamping the file's own hash into the query string gives the icon a new URL
+    whenever, and only when, the image actually changes.
+    """
+    digest = hashlib.sha256((public / "apple-touch-icon.png").read_bytes()).hexdigest()[:8]
+
+    index = root / "index.html"
+    html = index.read_text()
+    html = re.sub(
+        r'(href="[^"]*apple-touch-icon\.png)(\?v=[0-9a-f]+)?"',
+        r'\1?v=' + digest + '"',
+        html,
+    )
+    index.write_text(html)
+
+    for name in ("manifest.webmanifest", "manifest.json"):
+        manifest = public / name
+        if not manifest.exists():
+            continue
+        text = manifest.read_text()
+        text = re.sub(
+            r'("src": "[^"]*icon-\d+\.png)(\?v=[0-9a-f]+)?"',
+            r'\1?v=' + digest + '"',
+            text,
+        )
+        manifest.write_text(text)
+
+    return digest
+
+
 def main():
     root = pathlib.Path(__file__).resolve().parent.parent
     if "--debug" in sys.argv:
@@ -166,7 +208,8 @@ def main():
     # iOS applies its own rounding, so this one stays a full square.
     png(180).save(out / "apple-touch-icon.png")
     (out / "favicon.svg").write_text(svg())
-    print(f"wrote 4 files to {out}")
+    digest = stamp(out, out.parent)
+    print(f"wrote 4 files to {out}, stamped ?v={digest}")
 
 
 if __name__ == "__main__":

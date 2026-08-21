@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
 """
-Render the app icon: a thin 24-hour ring with the sleep window drawn on it.
+Render the app icon: a thin clock face with the sleep window drawn on the rim.
 
-A full day round once, not twelve hours round twice - so a sleep window that
-crosses midnight is one continuous arc instead of a shape that wraps and reads
-as two. The dial is oriented the way a day feels rather than the way a clock is
-built: midnight at the bottom, noon at the top, 06:00 at the left and 18:00 at
-the right, so the night sits along the bottom of the ring.
+Twelve hours round once, read like any clock: 12 at the top, 3 at the right, 6
+at the bottom, 9 at the left. The sleep window runs from 22:00 - the 10 o'clock
+position - clockwise past midnight to 06:30, which sits just left of the bottom.
+The waking hours take the rest of the rim in grey-white.
 
-No numbers, no hands, and the middle is empty. The only thing the ring says is
-which arc of the day is spent asleep, in bordeaux, with the waking hours in
-grey-white. The arc ends are square cuts across the ring rather than round caps,
-because it marks a boundary between two parts of a whole and not the end of a
-bar.
+No numbers, no hands, and the middle is empty. The arc ends are square cuts
+across the band rather than round caps, because they mark a boundary between two
+parts of a whole and not the end of a bar.
 
     python3 scripts/makeicon.py
+    python3 scripts/makeicon.py --debug   # ticks and hour labels, to check the maths
 
 Writes favicon.svg, icon-192.png, icon-512.png and apple-touch-icon.png into
 public/. Not run at build time - the icon changes about once.
@@ -22,10 +20,11 @@ public/. Not run at build time - the icon changes about once.
 import colorsys
 import math
 import pathlib
+import sys
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
-SS = 4  # supersample factor, for a clean edge on a ring this thin
+SS = 4  # supersample factor, for a clean edge on a band this thin
 CANVAS = 1024
 BACKGROUND = (0, 0, 0)
 
@@ -36,15 +35,14 @@ SLEEP_HSL = (348, 60, 44)
 # the bordeaux rather than as a gap in the ring.
 WAKING = (0xD9, 0xD6, 0xD4)
 
-# The window the ring describes, in hours on a 24-hour day.
+# The window the face describes, as times of day on a 24-hour clock. They are
+# reduced onto the 12-hour dial by angle() below.
 SLEEP_FROM = 22.0
 SLEEP_TO = 6.5
 
-# Outer edge and thickness, as fractions of the canvas. The ring is deliberately
-# a hairline against its own diameter - about 6% - which is what stops it
-# reading as a pie chart with a hole punched in it.
-OUTER = 0.332
-THICKNESS = 0.043
+# Outer edge and band thickness, as fractions of the canvas.
+OUTER = 0.355
+THICKNESS = 0.050
 
 
 def rgb(h, s, l):
@@ -54,13 +52,13 @@ def rgb(h, s, l):
 
 def angle(hour):
     """
-    Hour of the day to drawing degrees, where 0 is 3 o'clock and they run
-    clockwise.
+    Time of day to drawing degrees, where 0 is 3 o'clock and they run clockwise.
 
-    Anchored so 06:00 lands at the 9 o'clock position and 18:00 at the 3
-    o'clock position, which puts midnight at the bottom and noon at the top.
+    A 12-hour dial: each hour is 30 degrees, and the -90 puts 12 o'clock at the
+    top where a clock has it. 22:00 reduces to the 10 o'clock position (210) and
+    06:30 to just left of the bottom (105).
     """
-    return 180.0 + (hour - 6.0) * 15.0
+    return (hour % 12) * 30.0 - 90.0
 
 
 def _box(px, radius):
@@ -69,17 +67,22 @@ def _box(px, radius):
     return [c - r, c - r, c + r, c + r]
 
 
-def draw(px):
+def sweep():
+    """Start and end of the sleep arc in drawing degrees, end always after start."""
+    start = angle(SLEEP_FROM)
+    end = angle(SLEEP_TO)
+    if end <= start:
+        end += 360.0
+    return start, end
+
+
+def draw(px, debug=False):
     img = Image.new("RGB", (px, px), BACKGROUND)
     d = ImageDraw.Draw(img)
 
     outer = _box(px, OUTER)
     inner = _box(px, OUTER - THICKNESS)
-
-    start = angle(SLEEP_FROM)
-    end = angle(SLEEP_TO)
-    if end <= start:
-        end += 360.0
+    start, end = sweep()
 
     # Filled disc, sleep window cut into it, then the middle punched back out to
     # the page. Done in that order because it gives both arcs one shared radial
@@ -88,24 +91,45 @@ def draw(px):
     d.ellipse(outer, fill=WAKING)
     d.pieslice(outer, start, end, fill=rgb(*SLEEP_HSL))
     d.ellipse(inner, fill=BACKGROUND)
+
+    if debug:
+        _annotate(d, px)
     return img
 
 
-def png(px):
+def _annotate(d, px):
+    """Hour ticks and labels, so the arc ends can be checked against a real dial."""
+    c = px / 2.0
+    font = ImageFont.load_default(size=max(10, px // 40))
+    for h in range(12):
+        a = math.radians(angle(h))
+        r1, r2 = OUTER * px + 4, OUTER * px + 14
+        d.line(
+            [c + r1 * math.cos(a), c + r1 * math.sin(a),
+             c + r2 * math.cos(a), c + r2 * math.sin(a)],
+            fill=(90, 90, 90), width=max(1, px // 340),
+        )
+        rl = OUTER * px + 34
+        label = str(12 if h == 0 else h)
+        d.text((c + rl * math.cos(a), c + rl * math.sin(a)), label,
+               fill=(150, 150, 150), font=font, anchor="mm")
+    for hour, colour in ((SLEEP_FROM, (0, 200, 255)), (SLEEP_TO, (0, 255, 120))):
+        a = math.radians(angle(hour))
+        d.line([c, c, c + (OUTER * px) * math.cos(a), c + (OUTER * px) * math.sin(a)],
+               fill=colour, width=max(1, px // 300))
+
+
+def png(px, debug=False):
     """Draw oversized and downsample, which is cheaper than antialiasing by hand."""
-    return draw(px * SS).resize((px, px), Image.LANCZOS)
+    return draw(px * SS, debug).resize((px, px), Image.LANCZOS)
 
 
 def svg():
     c = CANVAS / 2.0
     w = THICKNESS * CANVAS
-    # Stroked from the centre line of the ring, so the radius is the mid-radius.
+    # Stroked from the centre line of the band, so this is the mid-radius.
     r = (OUTER * CANVAS) - w / 2.0
-
-    start = angle(SLEEP_FROM)
-    end = angle(SLEEP_TO)
-    if end <= start:
-        end += 360.0
+    start, end = sweep()
 
     def point(deg):
         rad = math.radians(deg)
@@ -129,7 +153,13 @@ def svg():
 
 
 def main():
-    out = pathlib.Path(__file__).resolve().parent.parent / "public"
+    root = pathlib.Path(__file__).resolve().parent.parent
+    if "--debug" in sys.argv:
+        out = root / "scripts" / "icon-debug.png"
+        png(512, debug=True).save(out)
+        print(f"wrote {out}")
+        return
+    out = root / "public"
     out.mkdir(exist_ok=True)
     png(192).save(out / "icon-192.png")
     png(512).save(out / "icon-512.png")

@@ -70,19 +70,26 @@ the point furthest from when anyone sleeps, so a bedtime drifting from 21:00 to
 
 ## The icon
 
-A thin ring carrying one full day, not twelve hours round twice — so a sleep
-window that crosses midnight is a single continuous arc instead of a shape that
-wraps and reads as two. It is oriented the way a day feels rather than the way a
-clock is built: midnight at the bottom, noon at the top, 06:00 at the left and
-18:00 at the right, which puts the night along the bottom of the ring.
+A thin clock face with the sleep window drawn on the rim. Twelve hours round
+once and read like any clock — 12 at the top, 3 at the right — with the window
+running from 22:00 at the 10 o'clock position, clockwise past midnight, to 06:30
+just left of the bottom. The waking hours take the rest of the rim in grey-white.
 
-No numbers, no hands, empty in the middle. Bordeaux for the sleep window,
-grey-white for the waking hours, and square cuts across the ring where they meet
-rather than round caps — it is a boundary between two parts of a whole, not the
-end of a bar.
+No numbers, no hands, empty in the middle, and square cuts across the band where
+the two arcs meet rather than round caps — it is a boundary between two parts of
+a whole, not the end of a bar.
+
+A 24-hour dial was tried first, on the reasoning that a window crossing midnight
+is then one continuous arc rather than a shape that wraps. It is worse for a
+reason that has nothing to do with the geometry: everyone reads a circle with a
+mark on it as a clock, so 22:00 sitting at the 8 o'clock position looks like a
+mistake rather than like a different scale.
+
+`--debug` draws hour ticks, labels, and a radial line at each end of the arc, so
+the boundaries can be checked against a real dial instead of eyeballed:
 
 ```bash
-python3 scripts/makeicon.py
+python3 scripts/makeicon.py --debug
 ```
 
 Regenerate after changing `--primary` in `src/index.css` — the script carries

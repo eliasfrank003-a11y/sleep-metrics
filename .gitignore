@@ -15,3 +15,6 @@ dist-ssr
 supabase/.temp
 
 *.tsbuildinfo
+
+# Written by scripts/makeicon.py --debug
+scripts/icon-debug.png
